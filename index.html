@@ -1,6 +1,31 @@
 <html>
-<body>
-MathBiol
-<script src="mathbiol.js"></script>
-</body>
+    <head>
+        <title>MathBiol</title>
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.5.0/localforage.min.js"></script>
+        <script src="https://socrata.github.io/soda-js/lib/soda-js.bundle.js"></script>
+    </head>
+    <body>
+
+    <div id="dcdDiv" class="container-fluid">
+        <h3 style="color:maroon">MathBiol <a href="https://github.com/mathbiol/mathbiol.github.com" target="_target"><i class="fa fa-github-alt" aria-hidden="true"></i></a> <i  id="infoMore" style="color:green" class="fa fa-info-circle" aria-hidden="true"></i></h3>
+        <p id="infoShowHide"> 
+            Analytics console for the <a href="https://webcomputer.github.io/" target="blank">Web Computer</a>. It was primarily developed for applications in the Life Sciences but you are welcome to use it to infect other domains.
+        </p>
+        <div class="row">
+            <div class="col-md-6">
+                <textarea id="cmd" rows=4 style="width:100%;color:GreenYellow;background-color:black"> > </textarea>
+                <div id="cmdMsg">...msg...</div>
+            </div>
+            <div class="col-md-6">
+                <div id="cmdSide"> ... command side ... </div>
+            </div>
+        </div>
+        <hr>
+        <div id="cmdBase"> ... results ... </div>
+        <script src="mathbiol.js"></script>
+    </body>
 </html>
+
