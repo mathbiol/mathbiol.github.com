@@ -77,12 +77,32 @@ mathbiol.count=function(yrs,fun){
 
 //// command line interpreter///
 mathbiol.eval=function(cm,fun){
+    fun = fun || mathbiol.exe
+    // parsing command
+    
+    if(cm.match(/\s*[\S]+\s*=/)){ // it is an assertion
+        try{
+            eval(cm.replace(/\s*[>]*\s*([\S]+\s*=.*)/,'mathbiol.cmd.$1'))
+        }
+        catch(err){
+            console.log(err)
+        }        
+    }else{ // it's a call
+        console.log(eval(cm.replace(/ [>]*\s*([\S]+\s*)/,'mathbiol.cmd.$1')))
+        
+    }
+
+    fun()
 
 }
 
+mathbiol.cmd={}
 mathbiol.log={}
-mathbiol.msg=function(txt){
-    cmdMsg.innerHTML=txt
+mathbiol.msg=function(h){
+    cmdMsg.innerHTML=h
+}
+mathbiol.side=function(h){
+    cmdSide.innerHTML=h
 }
 
 mathbiol.exe = function(){
@@ -98,9 +118,13 @@ mathbiol.exe = function(){
         }
         if(mathbiol.exe_eval){
             
-            console.log('EVAL')
+            console.log('EVAL '+i+mathbiol.log.new[i])
+            mathbiol.eval(mathbiol.log.new[i])
+            
+        }else{
+            mathbiol.exe()
         }
-        mathbiol.exe()
+        
     }else{
         if(mathbiol.log.new.slice(-1)[0]==" >  > "){ // middle insertion
             mathbiol.log.new.slice(-1)[0]=" > "
@@ -114,8 +138,8 @@ mathbiol.exe = function(){
 
 cmd.onkeyup=function(ev){
     if((ev.keyCode==13)&&(!ev.shiftKey)){ // enter was pressed without shift
-        this.value+=' > '
-        mathbiol.log.new=this.value.split('\n')
+        if(this.value.slice(-3)!==" > "){this.value+=' > '}
+        mathbiol.log.new=this.value.split('\n >')
         mathbiol.exe_i=0 // reset interpretation before starting it
         mathbiol.exe_eval=false
         mathbiol.exe() // evaluate command
