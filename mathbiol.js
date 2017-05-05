@@ -78,19 +78,38 @@ mathbiol.count=function(yrs,fun){
 //// command line interpreter///
 mathbiol.eval=function(cm,fun){
     fun = fun || mathbiol.exe
-    // parsing command
-    
-    if(cm.match(/\s*[\S]+\s*=/)){ // it is an assertion
-        try{
-            eval(cm.replace(/\s*[>]*\s*([\S]+\s*=.*)/,'mathbiol.cmd.$1'))
-        }
-        catch(err){
-            console.log(err)
-        }        
-    }else{ // it's a call
-        console.log(eval(cm.replace(/ [>]*\s*([\S]+\s*)/,'mathbiol.cmd.$1')))
-        
+    console.log(cm)
+    cm = cm.replace(/^\s*>\s*/,'') // remove prompt
+    console.log(cm)
+    // reroute variables as attributes of mathbiol.cmd
+    var cm2 = cm.replace(/([A-Za-z]\w*)/g,'mathbiol.cmd.$1')
+    cm2 = cm2.replace(/(["'])([^"']*)mathbiol\.cmd\.([^"']*)(["'])/g,'$1$2$3$4')
+    while(cm2!==cm){
+        cm=cm2
+        cm2 = cm2.replace(/(["'])([^"']*)mathbiol\.cmd\.([^"']*)(["'])/g,'$1$2$3$4')
     }
+    // spacial patterns
+    if(cm2.match(/^[\w\.]+\s+[\w\.]?/)){  // fun x -> fun("x")
+        //let mm = cm2.match(/(\w+)\s+(\w+)/)
+        let [z,f,x]= cm2.match(/([\w\.]+)\s+([\w\.]+)/)
+        if(!eval(x)){
+            x=x.replace('mathbiol.cmd.','')
+            x='"'+x+'"'
+        }
+        cm2=f+'('+x+')'
+    }
+    cm2=cm2.replace(/(\w+)\s*(\w+)/,'$1("$2")') 
+
+    console.log(cm2)
+    try{
+       eval(cm2)
+    }
+    catch(err){
+       console.log(err)
+    }        
+    //}else{ // it's a call
+    //    console.log(eval(cm.replace(/ [>]*\s*([\S]+\s*)/,'mathbiol.cmd.$1')))    
+    //}
 
     fun()
 
