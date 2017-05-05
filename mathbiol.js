@@ -75,11 +75,31 @@ mathbiol.count=function(yrs,fun){
 
 }
 
+mathbiol.cmd={}
+mathbiol.log={}
+mathbiol.msg=function(h){
+    cmdMsg.innerHTML=h
+    cmdMsg.style.color='green'
+    setTimeout(function(){
+        cmdMsg.style.color='blue'
+    },500)
+}
+mathbiol.side=function(h){
+    cmdSide.innerHTML=h
+    
+}
+
+
 //// command line interpreter///
 mathbiol.eval=function(cm,fun){
+    cm = cm || ''
     fun = fun || mathbiol.exe
     console.log(cm)
-    cm = cm.replace(/^\s*>\s*/,'') // remove prompt
+    // clean new lines
+    cm=cm.replace(/\n/g,';')
+    cm=cm.replace(/([>=]);/,'$1') // in case first break is mid-defenition
+    // remove prompt
+    cm = cm.replace(/^\s*>\s*/,'') 
     console.log(cm)
     // reroute variables as attributes of mathbiol.cmd
     var cm2 = cm.replace(/([A-Za-z]\w*)/g,'mathbiol.cmd.$1')
@@ -89,39 +109,34 @@ mathbiol.eval=function(cm,fun){
         cm2 = cm2.replace(/(["'])([^"']*)mathbiol\.cmd\.([^"']*)(["'])/g,'$1$2$3$4')
     }
     // spacial patterns
-    if(cm2.match(/^[\w\.]+\s+[\w\.]?/)){  // fun x -> fun("x")
-        //let mm = cm2.match(/(\w+)\s+(\w+)/)
-        let [z,f,x]= cm2.match(/([\w\.]+)\s+([\w\.]+)/)
-        if(!eval(x)){
+    // fun x -> fun("x")
+    if(cm2.match(/^\s*[\w\.]+\s+[\w\.]+$/)){  
+        let [z,f,x]= cm2.match(/\s*([\w\.]+)\s+([\w\.]+)/)
+        if(eval(x)){
             x=x.replace('mathbiol.cmd.','')
             x='"'+x+'"'
         }
         cm2=f+'('+x+')'
     }
-    cm2=cm2.replace(/(\w+)\s*(\w+)/,'$1("$2")') 
+    // fun=(a)=>...
+    if(cm2.match(/^\s*[\w.]+\s*=\s*\(.+/)){
+        let mm = cm2.match(/^\s*([\w.]+\s*=\s*\()(.+)/)
+        cm2=mm[1]+mm[2].replace(/mathbiol\.cmd\./g,'')
+    }
 
     console.log(cm2)
     try{
-       eval(cm2)
+       mathbiol.cmd.ans=eval(cm2)
     }
     catch(err){
+       mathbiol.cmd.ans=err
        console.log(err)
-    }        
-    //}else{ // it's a call
-    //    console.log(eval(cm.replace(/ [>]*\s*([\S]+\s*)/,'mathbiol.cmd.$1')))    
-    //}
+    }
+
+    mathbiol.msg(mathbiol.cmd.ans)
 
     fun()
 
-}
-
-mathbiol.cmd={}
-mathbiol.log={}
-mathbiol.msg=function(h){
-    cmdMsg.innerHTML=h
-}
-mathbiol.side=function(h){
-    cmdSide.innerHTML=h
 }
 
 mathbiol.exe = function(){
