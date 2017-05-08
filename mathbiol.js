@@ -125,13 +125,16 @@ mathbiol.eval=function(cm,fun){
     }
 
     console.log(cm2)
-    try{
-       mathbiol.cmd.ans=eval(cm2)
+    if(cm2.match(/\S/)){ // eval it only if it is not empty
+        try{
+           mathbiol.cmd.ans=eval(cm2)
+        }
+        catch(err){
+           mathbiol.cmd.ans=err
+           console.log(err)
+        }
     }
-    catch(err){
-       mathbiol.cmd.ans=err
-       console.log(err)
-    }
+        
 
     mathbiol.msg(mathbiol.cmd.ans)
 
