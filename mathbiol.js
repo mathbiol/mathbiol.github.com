@@ -123,7 +123,7 @@ mathbiol.eval=function(cm,fun){
         let mm = cm2.match(/^\s*([\w.]+\s*=\s*\()(.+)/)
         cm2=mm[1]+mm[2].replace(/mathbiol\.cmd\./g,'')
     }
-
+    cm2=cm2.replace('.mathbiol.cmd.','.') // last chance to remove excessive attribute replacement
     console.log(cm2)
     if(cm2.match(/\S/)){ // eval it only if it is not empty
         try{
@@ -176,6 +176,8 @@ mathbiol.exe = function(){
 cmd.onkeyup=function(ev){
     if((ev.keyCode==13)&&(!ev.shiftKey)){ // enter was pressed without shift
         if(this.value.slice(-3)!==" > "){this.value+=' > '}
+        // remove empty lines
+        this.value=this.value.replace('\n\n','\n')
         mathbiol.log.new=this.value.split('\n >')
         mathbiol.exe_i=0 // reset interpretation before starting it
         mathbiol.exe_eval=false
