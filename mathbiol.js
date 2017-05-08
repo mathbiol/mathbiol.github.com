@@ -109,10 +109,11 @@ mathbiol.eval=function(cm,fun){
         cm2 = cm2.replace(/(["'])([^"']*)mathbiol\.cmd\.([^"']*)(["'])/g,'$1$2$3$4')
     }
     // spacial patterns
+    cm2=cm2.replace(/\.mathbiol\.cmd\./g,'.') // last chance to remove excessive attribute replacement
     // fun x -> fun("x")
     if(cm2.match(/^\s*[\w\.]+\s+[\w\.]+$/)){  
         let [z,f,x]= cm2.match(/\s*([\w\.]+)\s+([\w\.]+)/)
-        if(eval(x)){
+        if(!eval(x)){
             x=x.replace('mathbiol.cmd.','')
             x='"'+x+'"'
         }
@@ -123,7 +124,14 @@ mathbiol.eval=function(cm,fun){
         let mm = cm2.match(/^\s*([\w.]+\s*=\s*\()(.+)/)
         cm2=mm[1]+mm[2].replace(/mathbiol\.cmd\./g,'')
     }
-    cm2=cm2.replace('.mathbiol.cmd.','.') // last chance to remove excessive attribute replacement
+    cm2=cm2.replace(/^\s+/,'');cm2=cm2.replace(/\s+$/,'') // deblank
+    if(cm2.match(/^mathbiol.cmd.\w+$/)){ // sole command
+        let c = cm2.match(/^mathbiol.cmd.(\w+)$/)[1]
+        if(typeof(window.mathbiol.cmd[c])==="function"){
+            cm2+='()'
+        }
+    }
+    cm2=cm2.replace(/\.mathbiol\.cmd\./g,'.') // last chance to remove excessive attribute replacement
     console.log(cm2)
     if(cm2.match(/\S/)){ // eval it only if it is not empty
         try{
@@ -204,4 +212,34 @@ if(document.getElementById('infoMore')){
         }
     }
 } 
-//
+
+// -------------------------------
+//          Native commands
+// -------------------------------
+
+mathbiol.cmd={
+    tic:function(){
+        var d = new Date()
+        this.tic.t0=d
+        return 'tic started at '+d
+    },
+    toc:function(){
+        var t = new Date()
+        this.tic.t0 = this.tic.t0 || t // in case tic was not set 
+        this.toc.log = this.toc.log || [] // in case toc was not used before
+        var dt = t - this.tic.t0
+        this.toc.log.push(dt) // note we're tracking tocs here
+        return dt
+    },
+    length:function(x){
+        var ans
+        if(Array.isArray(x)){
+            ans = x.length
+        }else if(typeof(x)==='object'){
+            ans = Object.getOwnPropertyNames(x).length
+        }else{
+            ans = 'not an object or an array'
+        }
+        return ans
+    }
+}
