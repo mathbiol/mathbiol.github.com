@@ -78,6 +78,9 @@ mathbiol.count=function(yrs,fun){
 mathbiol.cmd={}
 mathbiol.log={}
 mathbiol.msg=function(h){
+    if(typeof(h)=='object'){
+        h='<pre>'+JSON.stringify(h,null,3)+'</pre>'
+    }
     cmdMsg.innerHTML=h
     cmdMsg.style.color='green'
     setTimeout(function(){
@@ -113,7 +116,7 @@ mathbiol.eval=function(cm,fun){
     // fun x -> fun("x")
     if(cm2.match(/^\s*[\w\.]+\s+[\w\.]+$/)){  
         let [z,f,x]= cm2.match(/\s*([\w\.]+)\s+([\w\.]+)/)
-        if(!eval(x)){
+        if((!eval(x))||(f==="mathbiol.cmd.help")){ // note call to help function treated differently
             x=x.replace('mathbiol.cmd.','')
             x='"'+x+'"'
         }
@@ -131,11 +134,18 @@ mathbiol.eval=function(cm,fun){
             cm2+='()'
         }
     }
+    // Final clean up
     cm2=cm2.replace(/\.mathbiol\.cmd\./g,'.') // last chance to remove excessive attribute replacement
+    cm2=cm2.replace(/,;/g,',')
+    cm2=cm2.replace(/{;/g,'{')
+    cm2=cm2.replace(/;}/g,'}')
     console.log(cm2)
     if(cm2.match(/\S/)){ // eval it only if it is not empty
         try{
            mathbiol.cmd.ans=eval(cm2)
+           if((!mathbiol.cmd.ans)&&(cm2.match(/\(\)$/))){ // if this is a function called with no arguments and no response
+               mathbiol.cmd.ans = eval(cm2.match(/(.+)\(\)$/)[1]) // return code
+           }
         }
         catch(err){
            mathbiol.cmd.ans=err
@@ -241,5 +251,26 @@ mathbiol.cmd={
             ans = 'not an object or an array'
         }
         return ans
-    }
+    },
+    help:function(cm){
+        var y
+        if(mathbiol.cmd[cm]){
+            if(mathbiol.cmd[cm].help){
+                y=mathbiol.cmd[cm].help
+            }else{
+                if(Array.isArray(mathbiol.cmd[cm])){
+                    y=cm+' is an Array length '+mathbiol.cmd[cm].length
+                }else{
+                    y=cm+' is a '+typeof(eval(mathbiol.cm[cm]))
+                }              
+            }
+        }else{
+            y='"'+cm+'" not found'
+        }
+        if(!cm){ // just help
+            y='how can I help you?'
+        }
+        return y
+    },
+    stringify:JSON.stringify
 }
