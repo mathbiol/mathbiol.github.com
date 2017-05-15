@@ -86,6 +86,7 @@ mathbiol.msg=function(h){
     setTimeout(function(){
         cmdMsg.style.color='blue'
     },500)
+    return h
 }
 mathbiol.side=function(h){
     cmdSide.innerHTML=h
@@ -139,6 +140,11 @@ mathbiol.sys.eval=function(cm,fun){
     cm2=cm2.replace(/,;/g,',')
     cm2=cm2.replace(/{;/g,'{')
     cm2=cm2.replace(/;}/g,'}')
+    if(cm2.match(/[\w\.=]+[\{\[].+[\}\]]/)){ // in case it is sloppy JSON
+        let [a,b,c]=cm2.match(/([\w\.=]+)([\{\[].+[\}\]])/)
+        c=c.replace(/mathbiol\./g,'')
+        cm2=b+c.replace(/(\w+)\:/g,'"$1":')
+    }
     console.log(cm2)
     if(cm2.match(/\S/)){ // eval it only if it is not empty
         try{
