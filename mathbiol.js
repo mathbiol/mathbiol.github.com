@@ -39,10 +39,10 @@ mathbiol.sodaRead= new soda.Consumer(mathbiol.uri)
 // get 
 mathbiol.get=function(q,yr){
     if(!yr){
-        yr=Object.getOwnPropertyNames(mathbiol.dtSrc)
+    yr=Object.getOwnPropertyNames(mathbiol.dtSrc)
     }
     if(!Array.isArray(yr)){
-        yr=[yr]
+    yr=[yr]
     }
     // handle year provided as number
     yr=yr.map(function(yi){
@@ -75,7 +75,7 @@ mathbiol.count=function(yrs,fun){
 
 }
 
-mathbiol.cmd={}
+mathbiol.sys={}
 mathbiol.log={}
 mathbiol.msg=function(h){
     if(typeof(h)=='object'){
@@ -94,9 +94,9 @@ mathbiol.side=function(h){
 
 
 //// command line interpreter///
-mathbiol.eval=function(cm,fun){
+mathbiol.sys.eval=function(cm,fun){
     cm = cm || ''
-    fun = fun || mathbiol.exe
+    fun = fun || mathbiol.sys.exe
     console.log(cm)
     // clean new lines
     cm=cm.replace(/\n/g,';')
@@ -104,20 +104,20 @@ mathbiol.eval=function(cm,fun){
     // remove prompt
     cm = cm.replace(/^\s*>\s*/,'') 
     console.log(cm)
-    // reroute variables as attributes of mathbiol.cmd
-    var cm2 = cm.replace(/([A-Za-z]\w*)/g,'mathbiol.cmd.$1')
-    cm2 = cm2.replace(/(["'])([^"']*)mathbiol\.cmd\.([^"']*)(["'])/g,'$1$2$3$4')
+    // reroute variables as attributes of mathbiol
+    var cm2 = cm.replace(/([A-Za-z]\w*)/g,'mathbiol.$1')
+    cm2 = cm2.replace(/(["'])([^"']*)mathbiol\.([^"']*)(["'])/g,'$1$2$3$4')
     while(cm2!==cm){
         cm=cm2
-        cm2 = cm2.replace(/(["'])([^"']*)mathbiol\.cmd\.([^"']*)(["'])/g,'$1$2$3$4')
+        cm2 = cm2.replace(/(["'])([^"']*)mathbiol\.([^"']*)(["'])/g,'$1$2$3$4')
     }
     // spacial patterns
-    cm2=cm2.replace(/\.mathbiol\.cmd\./g,'.') // last chance to remove excessive attribute replacement
+    cm2=cm2.replace(/\.mathbiol\./g,'.') // last chance to remove excessive attribute replacement
     // fun x -> fun("x")
     if(cm2.match(/^\s*[\w\.]+\s+[\w\.]+$/)){  
         let [z,f,x]= cm2.match(/\s*([\w\.]+)\s+([\w\.]+)/)
-        if((!eval(x))||(f==="mathbiol.cmd.help")){ // note call to help function treated differently
-            x=x.replace('mathbiol.cmd.','')
+        if((!eval(x))||(f==="mathbiol.help")){ // note call to help function treated differently
+            x=x.replace('mathbiol.','')
             x='"'+x+'"'
         }
         cm2=f+'('+x+')'
@@ -125,65 +125,65 @@ mathbiol.eval=function(cm,fun){
     // fun=(a)=>...
     if(cm2.match(/^\s*[\w.]+\s*=\s*\(.+/)){
         let mm = cm2.match(/^\s*([\w.]+\s*=\s*\()(.+)/)
-        cm2=mm[1]+mm[2].replace(/mathbiol\.cmd\./g,'')
+        cm2=mm[1]+mm[2].replace(/mathbiol\./g,'')
     }
     cm2=cm2.replace(/^\s+/,'');cm2=cm2.replace(/\s+$/,'') // deblank
-    if(cm2.match(/^mathbiol.cmd.\w+$/)){ // sole command
-        let c = cm2.match(/^mathbiol.cmd.(\w+)$/)[1]
-        if(typeof(window.mathbiol.cmd[c])==="function"){
+    if(cm2.match(/^mathbiol.\w+$/)){ // sole command
+        let c = cm2.match(/^mathbiol.(\w+)$/)[1]
+        if(typeof(window.mathbiol[c])==="function"){
             cm2+='()'
         }
     }
     // Final clean up
-    cm2=cm2.replace(/\.mathbiol\.cmd\./g,'.') // last chance to remove excessive attribute replacement
+    cm2=cm2.replace(/\.mathbiol\./g,'.') // last chance to remove excessive attribute replacement
     cm2=cm2.replace(/,;/g,',')
     cm2=cm2.replace(/{;/g,'{')
     cm2=cm2.replace(/;}/g,'}')
     console.log(cm2)
     if(cm2.match(/\S/)){ // eval it only if it is not empty
         try{
-           mathbiol.cmd.ans=eval(cm2)
-           if((!mathbiol.cmd.ans)&&(cm2.match(/\(\)$/))){ // if this is a function called with no arguments and no response
-               mathbiol.cmd.ans = eval(cm2.match(/(.+)\(\)$/)[1]) // return code
+           mathbiol.ans=eval(cm2)
+           if((!mathbiol.ans)&&(cm2.match(/\(\)$/))){ // if this is a function called with no arguments and no response
+               mathbiol.ans = eval(cm2.match(/(.+)\(\)$/)[1]) // return code
            }
         }
         catch(err){
-           mathbiol.cmd.ans=err
+           mathbiol.ans=err
            console.log(err)
         }
     }
         
 
-    mathbiol.msg(mathbiol.cmd.ans)
+    mathbiol.msg(mathbiol.ans)
 
     fun()
 
 }
 
-mathbiol.exe = function(){
+mathbiol.sys.exe = function(){
     mathbiol.log.old = mathbiol.log.old || [' > '] // start log if it doesn't exist
 
     // compare entries and start evaluating them from last change
-    var i = mathbiol.exe_i
-    mathbiol.exe_i++
+    var i = mathbiol.sys.exe_i
+    mathbiol.sys.exe_i++
     if(i<mathbiol.log.old.length){
         console.log(i+') at '+Date())
         if(mathbiol.log.old[i]!==mathbiol.log.new[i]){
-            mathbiol.exe_eval=true
+            mathbiol.sys.exe_eval=true
         }
-        if(mathbiol.exe_eval){
+        if(mathbiol.sys.exe_eval){
             
             console.log('EVAL '+i+mathbiol.log.new[i])
-            mathbiol.eval(mathbiol.log.new[i])
+            mathbiol.sys.eval(mathbiol.log.new[i])
             
         }else{
-            mathbiol.exe()
+            mathbiol.sys.exe()
         }
         
     }else{
         if(mathbiol.log.new.slice(-1)[0]==" >  > "){ // middle insertion
             mathbiol.log.new.slice(-1)[0]=" > "
-            cmd.value=cmd.value.slice(0,-3)
+            sys.value=sys.value.slice(0,-3)
         }
         mathbiol.log.old=mathbiol.log.new
     }
@@ -197,9 +197,9 @@ cmd.onkeyup=function(ev){
         // remove empty lines
         this.value=this.value.replace('\n\n','\n')
         mathbiol.log.new=this.value.split('\n >')
-        mathbiol.exe_i=0 // reset interpretation before starting it
-        mathbiol.exe_eval=false
-        mathbiol.exe() // evaluate command
+        mathbiol.sys.exe_i=0 // reset interpretation before starting it
+        mathbiol.sys.exe_eval=false
+        mathbiol.sys.exe() // evaluate command
     }
 }
 
@@ -227,50 +227,52 @@ if(document.getElementById('infoMore')){
 //          Native commands
 // -------------------------------
 
-mathbiol.cmd={
-    tic:function(){
-        var d = new Date()
-        this.tic.t0=d
-        return 'tic started at '+d
-    },
-    toc:function(){
-        var t = new Date()
-        this.tic.t0 = this.tic.t0 || t // in case tic was not set 
-        this.toc.log = this.toc.log || [] // in case toc was not used before
-        var dt = t - this.tic.t0
-        this.toc.log.push(dt) // note we're tracking tocs here
-        return dt
-    },
-    length:function(x){
-        var ans
-        if(Array.isArray(x)){
-            ans = x.length
-        }else if(typeof(x)==='object'){
-            ans = Object.getOwnPropertyNames(x).length
-        }else{
-            ans = 'not an object or an array'
-        }
-        return ans
-    },
-    help:function(cm){
-        var y
-        if(mathbiol.cmd[cm]){
-            if(mathbiol.cmd[cm].help){
-                y=mathbiol.cmd[cm].help
-            }else{
-                if(Array.isArray(mathbiol.cmd[cm])){
-                    y=cm+' is an Array length '+mathbiol.cmd[cm].length
-                }else{
-                    y=cm+' is a '+typeof(eval(mathbiol.cm[cm]))
-                }              
-            }
-        }else{
-            y='"'+cm+'" not found'
-        }
-        if(!cm){ // just help
-            y='how can I help you?'
-        }
-        return y
-    },
-    stringify:JSON.stringify
+mathbiol.tic=function(){
+    var d = new Date()
+    this.tic.t0=d
+    return 'tic started at '+d
 }
+
+mathbiol.toc=function(){
+    var t = new Date()
+    this.tic.t0 = this.tic.t0 || t // in case tic was not set 
+    this.toc.log = this.toc.log || [] // in case toc was not used before
+    var dt = t - this.tic.t0
+    this.toc.log.push(dt) // note we're tracking tocs here
+    return dt
+}
+
+mathbiol.length=function(x){
+    var ans
+    if(Array.isArray(x)){
+        ans = x.length
+    }else if(typeof(x)==='object'){
+        ans = Object.getOwnPropertyNames(x).length
+    }else{
+        ans = 'not an object or an array'
+    }
+    return ans
+}
+
+mathbiol.help=function(cm){
+    var y
+    if(mathbiol[cm]){
+        if(mathbiol[cm].help){
+            y=mathbiol[cm].help
+        }else{
+            if(Array.isArray(mathbiol[cm])){
+            y=cm+' is an Array length '+mathbiol[cm].length
+            }else{
+            y=cm+' is a '+typeof(eval(mathbiol[cm]))
+            }          
+        }
+    }else{
+        y='"'+cm+'" not found'
+    }
+    if(!cm){ // just help
+        y='how can I help you?'
+    }
+    return y
+}
+
+mathbiol.stringify=JSON.stringify
