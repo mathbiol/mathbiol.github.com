@@ -3,11 +3,11 @@ console.log('mathbiol.js loaded ...');
 //mathbiol=(function(){
 var mathbiol={}
 // root URI for https://health.data.ny.gov/resource/s8d9-z734.json etc 
-mathbiol.uri = 'health.data.ny.gov'
-mathbiol.yrs = [2009,2010,2011,2012,2013,2014]
+// mathbiol.uri = 'health.data.ny.gov'
+// mathbiol.yrs = [2009,2010,2011,2012,2013,2014]
 
 // data resources
-mathbiol.res={}
+/*mathbiol.res={}
 mathbiol.res[2009]="s8d9-z734"
 mathbiol.res[2010]="dpew-wqcg"
 mathbiol.res[2011]="n5y9-zanf"
@@ -21,18 +21,18 @@ mathbiol.dtSrc={}
 mathbiol.yrs.forEach(function(yr){
     mathbiol.dtSrc['url'+yr]='https://'+mathbiol.uri+'/resource/'+mathbiol.res[yr]+'.json'
 })
-/*
+
 mathbiol.dt.url2009="https://health.data.ny.gov/resource/s8d9-z734.json"
 mathbiol.dt.url2010="https://health.data.ny.gov/resource/dpew-wqcg.json"
 mathbiol.dt.url2011="https://health.data.ny.gov/resource/n5y9-zanf.json"
 mathbiol.dt.url2012="https://health.data.ny.gov/resource/rv8x-4fm3.json"
 mathbiol.dt.url2013="https://health.data.ny.gov/resource/tdf6-7fpk.json"
 mathbiol.dt.url2014="https://health.data.ny.gov/resource/pzzw-8zdv.json"
-*/
+
 
 // SODA readers
 
-mathbiol.sodaRead= new soda.Consumer(mathbiol.uri)
+//mathbiol.sodaRead= new soda.Consumer(mathbiol.uri)
 
 4
 
@@ -75,11 +75,13 @@ mathbiol.count=function(yrs,fun){
 
 }
 
+*/
+
 mathbiol.sys={}
 mathbiol.log={}
 mathbiol.msg=function(h){
-    if(typeof(h)=='object'){
-        h='<pre>'+JSON.stringify(h,null,3)+'</pre>'
+    if(typeof(h)=='object'||typeof(h)=='function'){
+        h='<pre>'+mathbiol.stringify(h,null,3)+'</pre>'
     }
     cmdMsg.innerHTML=h
     cmdMsg.style.color='green'
@@ -89,8 +91,7 @@ mathbiol.msg=function(h){
     return h
 }
 mathbiol.side=function(h){
-    cmdSide.innerHTML=h
-    
+    cmdSide.innerHTML=h    
 }
 
 
@@ -260,25 +261,55 @@ mathbiol.length=function(x){
     return ans
 }
 
-mathbiol.help=function(cm){
-    var y
-    if(mathbiol[cm]){
-        if(mathbiol[cm].help){
-            y=mathbiol[cm].help
+mathbiol.stringify=function(x){
+    var y = ''
+    if(typeof(x)=='function'){
+        if(x['about']){
+            y=x['about']
         }else{
-            if(Array.isArray(mathbiol[cm])){
-            y=cm+' is an Array length '+mathbiol[cm].length
-            }else{
-            y=cm+' is a '+typeof(eval(mathbiol[cm]))
-            }          
+            y = x.toString(x)
         }
     }else{
-        y='"'+cm+'" not found'
+        // look for // comments
+        y = JSON.stringify(x)        
     }
-    if(!cm){ // just help
-        y='how can I help you?'
-    }
+    if(y.length>100){y=y.slice(0,100)+'...'}
     return y
 }
 
-mathbiol.stringify=JSON.stringify
+mathbiol.help=function(cm){
+    y=''
+    if(!cm){
+        var h = '<h4 style="color:navy">help</h4>'
+        h +='<p style="color:green">You can get back to this page at any time by typing "help" in the command line.<p>'
+        h +='<p>You can write your own commands <a href="#"><i class="fa fa-youtube-play" aria-hidden="true" style="color:maroon"></i></a>,'
+        h +=' or by loading an existing package. Try "load" for a list of registered packages.</p>'
+        mathbiol.side(h)
+    }else{
+        if(mathbiol[cm]){
+            if(mathbiol[cm].help){
+                mathbiol.side(mathbiol[cm].help)
+            }else{
+                if(Array.isArray(mathbiol[cm])){
+                    y=cm+' is an Array length '+mathbiol[cm].length
+                }else{
+                    y=cm+' is a '+typeof(eval(mathbiol[cm]))
+                }          
+            }
+        }else{
+            y='"'+cm+'" not found'
+        }
+    }
+    return y
+}
+mathbiol.help.about='help &lt;command&gt; for detail on command use'
+
+
+// --- INI ---
+
+if(document.getElementById('cmdSide')){
+    mathbiol.help()
+}
+if(document.getElementById('cmdSide')){
+    mathbiol.msg('you type help any time')
+}
