@@ -1,3 +1,4 @@
 {
-    "sparcs":"http://localhost:8000/sparcs/sparcs.js"
+    "sparcs_":"http://localhost:8000/sparcs/sparcs.js",
+    "sparcs":"https://mathbiol.github.io/sparcs/sparcs.js"
 }
