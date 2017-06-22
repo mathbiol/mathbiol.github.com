@@ -206,11 +206,14 @@ mathbiol.sys.cmdEval=function(){
 mathbiol.sys.cmd=function(c){
     cmd.value+=c+'\n > '
     mathbiol.sys.cmdEval()
+    cmd.scrollTop=cmd.scrollHeight
 }
 mathbiol.sys.cmdSlow=function(c,t){
+    cmd.scrollTop=cmd.scrollHeight
     var t = t || 50
     c.split('').forEach(function(ci,i){
         setTimeout(function(){
+            cmd.scrollTop=cmd.scrollHeight
             cmd.value+=ci
             if(i==(c.length-1)){
                 console.log('done')
@@ -219,6 +222,23 @@ mathbiol.sys.cmdSlow=function(c,t){
             }
         },t*(i+1))
     })   
+}
+mathbiol.sys.getScript=function(url,fun){ // add script to the head
+    var sr = document.createElement('script')
+    sr.src=url
+    if(fun){sr.onload=function(){fun()}}
+    document.head.appendChild(sr)
+}
+mathbiol.sys.getJSON=function(url,fun){ // cached get
+    fun = fun || function(x){console.log(x)}
+    localforage.getItem(url)
+     .then(function(x){
+         fun(x)
+    })
+     .catch($.getJSON(url,function(x){
+         localforage.setItem(url,x)
+         fun(x)
+     }))
 }
 
 // Command event
@@ -310,12 +330,16 @@ mathbiol.help=function(cm){
     }else{
         if(mathbiol[cm]){
             if(mathbiol[cm].help){
-                mathbiol.side(mathbiol[cm].help)
+                mathbiol.side('<h4 style="color:navy">'+cm+'</h4>'+mathbiol[cm].help)
             }else{
                 if(Array.isArray(mathbiol[cm])){
                     y=cm+' is an Array length '+mathbiol[cm].length
                 }else{
-                    y=cm+' is a '+typeof(eval(mathbiol[cm]))
+                    let tp = typeof(eval(mathbiol[cm])) /// find type
+                    y=cm+' is a '+tp
+                    if((tp==='function')&&(mathbiol[cm].about)){
+                        y=tp.about
+                    }                  
                 }          
             }
         }else{
@@ -325,6 +349,7 @@ mathbiol.help=function(cm){
     return y
 }
 mathbiol.help.about='help &lt;command&gt; for detail on command use'
+mathbiol.help.help='for help on help just type help once'
 
 mathbiol.load=function(md){
     if(!mathbiol.sys.load){
@@ -338,7 +363,7 @@ mathbiol.load=function(md){
             //mathbiol.msg(msg,'red') // <-- would be late in teh assynchrony
             return msg
         }else{
-            $.getScript(mathbiol.sys.load[md]).then(function(){
+            mathbiol.sys.getScript(mathbiol.sys.load[md],function(){
                 mathbiol.msg('module "'+md+'" loaded')
             })
         }
@@ -347,6 +372,7 @@ mathbiol.load=function(md){
     console.log('loading')
 }
 mathbiol.load.about='load &lt;module&gt; to load a module specified in load.json'
+mathbiol.load.help='This command will load <a href="load.json" target="_blank">registered modules</a> by name and can also load unregistered modules by url'
 
 // --- INI ---
 
