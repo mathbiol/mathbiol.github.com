@@ -79,14 +79,15 @@ mathbiol.count=function(yrs,fun){
 
 mathbiol.sys={}
 mathbiol.sys.log={}
-mathbiol.msg=function(h){
+mathbiol.msg=function(h,clr){
+    clr=clr||'blue'
     if(typeof(h)=='object'||typeof(h)=='function'){
         h='<pre>'+mathbiol.stringify(h,null,3)+'</pre>'
     }
     cmdMsg.innerHTML=h
     cmdMsg.style.color='green'
     setTimeout(function(){
-        cmdMsg.style.color='blue'
+        cmdMsg.style.color=clr
     },500)
     return h
 }
@@ -325,6 +326,27 @@ mathbiol.help=function(cm){
 }
 mathbiol.help.about='help &lt;command&gt; for detail on command use'
 
+mathbiol.load=function(md){
+    if(!mathbiol.sys.load){
+        $.getJSON('load.json').then(function(x){
+            mathbiol.sys.load=x
+            mathbiol.load(md)
+        })
+    }else{
+        if(!mathbiol.sys.load[md]){
+            var msg = '<span style="color:red">module "'+md+'" not found</span>'
+            //mathbiol.msg(msg,'red') // <-- would be late in teh assynchrony
+            return msg
+        }else{
+            $.getScript(mathbiol.sys.load[md]).then(function(){
+                mathbiol.msg('module "'+md+'" loaded')
+            })
+        }
+    }
+        
+    console.log('loading')
+}
+mathbiol.load.about='load &lt;module&gt; to load a module specified in load.json'
 
 // --- INI ---
 
