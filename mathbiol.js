@@ -78,7 +78,7 @@ mathbiol.count=function(yrs,fun){
 */
 
 mathbiol.sys={}
-mathbiol.log={}
+mathbiol.sys.log={}
 mathbiol.msg=function(h){
     if(typeof(h)=='object'||typeof(h)=='function'){
         h='<pre>'+mathbiol.stringify(h,null,3)+'</pre>'
@@ -168,32 +168,56 @@ mathbiol.sys.eval=function(cm,fun){
 }
 
 mathbiol.sys.exe = function(){
-    mathbiol.log.old = mathbiol.log.old || [' > '] // start log if it doesn't exist
+    mathbiol.sys.log.old = mathbiol.sys.log.old || [' > '] // start log if it doesn't exist
 
     // compare entries and start evaluating them from last change
     var i = mathbiol.sys.exe_i
     mathbiol.sys.exe_i++
-    if(i<mathbiol.log.old.length){
+    if(i<mathbiol.sys.log.old.length){
         console.log(i+') at '+Date())
-        if(mathbiol.log.old[i]!==mathbiol.log.new[i]){
+        if(mathbiol.sys.log.old[i]!==mathbiol.sys.log.new[i]){
             mathbiol.sys.exe_eval=true
         }
         if(mathbiol.sys.exe_eval){
             
-            console.log('EVAL '+i+mathbiol.log.new[i])
-            mathbiol.sys.eval(mathbiol.log.new[i])
+            console.log('EVAL '+i+mathbiol.sys.log.new[i])
+            mathbiol.sys.eval(mathbiol.sys.log.new[i])
             
         }else{
             mathbiol.sys.exe()
         }
         
     }else{
-        if(mathbiol.log.new.slice(-1)[0]==" >  > "){ // middle insertion
-            mathbiol.log.new.slice(-1)[0]=" > "
+        if(mathbiol.sys.log.new.slice(-1)[0]==" >  > "){ // middle insertion
+            mathbiol.sys.log.new.slice(-1)[0]=" > "
             sys.value=sys.value.slice(0,-3)
         }
-        mathbiol.log.old=mathbiol.log.new
+        mathbiol.sys.log.old=mathbiol.sys.log.new
     }
+}
+
+mathbiol.sys.cmdEval=function(){
+    mathbiol.sys.log.new=cmd.value.split('\n >')
+    mathbiol.sys.exe_i=0
+    mathbiol.sys.exe_eval=false
+    mathbiol.sys.exe()
+}
+mathbiol.sys.cmd=function(c){
+    cmd.value+=c+'\n > '
+    mathbiol.sys.cmdEval()
+}
+mathbiol.sys.cmdSlow=function(c,t){
+    var t = t || 50
+    c.split('').forEach(function(ci,i){
+        setTimeout(function(){
+            cmd.value+=ci
+            if(i==(c.length-1)){
+                console.log('done')
+                cmd.value+='\n > '
+                mathbiol.sys.cmdEval()
+            }
+        },t*(i+1))
+    })   
 }
 
 // Command event
@@ -203,10 +227,7 @@ cmd.onkeyup=function(ev){
         if(this.value.slice(-3)!==" > "){this.value+=' > '}
         // remove empty lines
         this.value=this.value.replace('\n\n','\n')
-        mathbiol.log.new=this.value.split('\n >')
-        mathbiol.sys.exe_i=0 // reset interpretation before starting it
-        mathbiol.sys.exe_eval=false
-        mathbiol.sys.exe() // evaluate command
+        mathbiol.sys.cmdEval()
     }
 }
 
@@ -312,4 +333,8 @@ if(document.getElementById('cmdSide')){
 }
 if(document.getElementById('cmdSide')){
     mathbiol.msg('you type help any time')
+}
+if(location.hash.length>1){
+    mathbiol.sys.cmdSlow(location.hash.slice(1))
+    4
 }
