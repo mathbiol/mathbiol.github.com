@@ -79,17 +79,23 @@ mathbiol.count=function(yrs,fun){
 
 mathbiol.sys={}
 mathbiol.sys.log={}
-mathbiol.msg=function(h,clr){
-    clr=clr||'blue'
+mathbiol.msg=function(h,clr,clrb){
+    clrb = clrb||'black' // background color
+    clr=clr||'greenyellow'
+    var y = y
     if(typeof(h)=='object'||typeof(h)=='function'){
-        h='<pre>'+mathbiol.stringify(h,null,3)+'</pre>'
+        h='<pre id="cmdMsgPre">'+mathbiol.stringify(h,null,3)+'</pre>'
+    }else{
+        h='<pre id="cmdMsgPre">'+h+'</pre>'
     }
     cmdMsg.innerHTML=h
-    cmdMsg.style.color='green'
+    cmdMsgPre.style.color='greenyellow'
+    cmdMsgPre.style.backgroundColor='black'
     setTimeout(function(){
-        cmdMsg.style.color=clr
+        cmdMsgPre.style.color=clr
+        cmdMsgPre.style.backgroundColor=clrb
     },500)
-    return h
+    return y
 }
 mathbiol.side=function(h){
     cmdSide.innerHTML=h    
