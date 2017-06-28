@@ -82,7 +82,7 @@ mathbiol.sys.log={}
 mathbiol.msg=function(h,clr,clrb){
     clrb = clrb||'black' // background color
     clr=clr||'greenyellow'
-    var y = y
+    var y = h
     if(typeof(h)=='object'||typeof(h)=='function'){
         h='<pre id="cmdMsgPre">'+mathbiol.stringify(h,null,3)+'</pre>'
     }else{
