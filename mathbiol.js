@@ -389,6 +389,6 @@ if(document.getElementById('cmdSide')){
     mathbiol.msg('you type help any time')
 }
 if(location.hash.length>1){
-    mathbiol.sys.cmdSlow(location.hash.slice(1))
+    mathbiol.sys.cmdSlow(decodeURIComponent(location.hash).slice(1))
     4
 }
