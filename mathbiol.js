@@ -336,7 +336,9 @@ mathbiol.help=function(cm){
     }else{
         if(mathbiol[cm]){
             if(mathbiol[cm].help){
-                mathbiol.side('<h4 style="color:navy">'+cm+'</h4>'+mathbiol[cm].help)
+                let h=mathbiol[cm].help
+                if(typeof(h)=='function'){h=h()}
+                mathbiol.side('<h4 style="color:navy">'+cm+'</h4>'+h)
             }else{
                 if(Array.isArray(mathbiol[cm])){
                     y=cm+' is an Array length '+mathbiol[cm].length
