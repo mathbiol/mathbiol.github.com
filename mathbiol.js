@@ -164,6 +164,17 @@ mathbiol.sys.eval=function(cm,fun){
         catch(err){
            mathbiol.ans=err
            console.log(err)
+           // try one last thing ...
+           cm2.replace(/^mathbiol\.([^\(]+)\(mathbiol\.([^\)]+)\)$/,function(mm,m1,m2){
+               if(window[m2]){
+                   if(window[m2][m1]){
+                       //debugger
+                       mathbiol.ans=window[m2][m1]()
+                       console.log('assuming '+m2+'.'+m1+'()')
+                   }
+               }
+           })
+           
         }
     }
         
