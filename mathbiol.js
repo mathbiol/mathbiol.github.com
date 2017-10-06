@@ -336,13 +336,15 @@ mathbiol.stringify=function(x){
     return y
 }
 
+mathbiol.cls='' // clear console msg
+
 mathbiol.help=function(cm){
     y=''
     if(!cm){
         var h = '<h4 style="color:navy">help</h4>'
         h +='<p style="color:green">You can get back to this page at any time by typing "help" in the command line.<p>'
         h +='<p>You can write your own commands <a href="#"><i class="fa fa-youtube-play" aria-hidden="true" style="color:maroon"></i></a>,'
-        h +=' or by loading an existing package. Try "load" for a list of registered packages.</p>'
+        h +=' or load an existing package. Try "load" for a list of registered packages.</p>'
         mathbiol.side(h)
     }else{
         if(mathbiol[cm]){
@@ -371,26 +373,36 @@ mathbiol.help.about='help &lt;command&gt; for detail on command use'
 mathbiol.help.help='for help on help just type help once'
 
 mathbiol.load=function(md){
-    if(!mathbiol.sys.load){
-        $.getJSON('load.json').then(function(x){
-            mathbiol.sys.load=x
-            mathbiol.load(md)
-        })
-    }else{
-        if(!mathbiol.sys.load[md]){
-            var msg = '<span style="color:red">module "'+md+'" not found</span>'
-            //mathbiol.msg(msg,'red') // <-- would be late in teh assynchrony
-            return msg
-        }else{
-            mathbiol.sys.getScript(mathbiol.sys.load[md],function(){
-                mathbiol.msg('module "'+md+'" loaded')
+    if(md){ // if md is defined
+        if(!mathbiol.sys.load){
+            $.getJSON('load.json').then(function(x){
+                mathbiol.sys.load=x
+                mathbiol.load(md)
             })
+        }else{
+            if(!mathbiol.sys.load[md]){
+                var msg = '<span style="color:red">module "'+md+'" not found</span>'
+                //mathbiol.msg(msg,'red') // <-- would be late in teh assynchrony
+                return msg
+            }else{
+                mathbiol.sys.getScript(mathbiol.sys.load[md],function(){
+                    mathbiol.msg('module "'+md+'" loaded')
+                })
+            }
         }
+    }else{
+        mathbiol.msg(mathbiol.load.about)
     }
-        
     console.log('loading')
 }
-mathbiol.load.about='load &lt;module&gt; to load a module specified in load.json'
+$.getJSON('load.json').then(function(j){
+    mathbiol.load.about='load &lt;module&gt; to load a module specified in load.json:\n\n'
+    mathbiol.load.about+=JSON.stringify(j,null,3)
+    mathbiol.load.about+='\n\nYou can also load from an external url directly.\nTry "load sparcs" for example.' 
+    mathbiol.load.about=[mathbiol.load.about] // to make sure all is shown
+    //debugger
+})
+
 mathbiol.load.help='This command will load <a href="load.json" target="_blank">registered modules</a> by name and can also load unregistered modules by url'
 
 // --- INI ---
