@@ -95,6 +95,7 @@ mathbiol.msg=function(h,clr,clrb){
         cmdMsgPre.style.color=clr
         cmdMsgPre.style.backgroundColor=clrb
     },500)
+    cmdMsgPre.style.width=cmd.style.width
     return y
 }
 mathbiol.side=function(h){
@@ -336,7 +337,9 @@ mathbiol.stringify=function(x){
     return y
 }
 
-mathbiol.cls='' // clear console msg
+mathbiol.cls=function(){ // clear side panel
+    cmdSide.innerHTML=cmdMsgPre.innerHTML=''
+}
 
 mathbiol.help=function(cm){
     y=''
